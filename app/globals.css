@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply min-h-screen;
+  }
+}
+
+@layer components {
+  .matrix-cell {
+    @apply w-12 h-12 text-center border border-terminal-border bg-terminal-bg text-terminal-text;
+    @apply focus:outline-none focus:ring-2 focus:ring-terminal-accent;
+  }
+
+  .matrix-cell-invalid {
+    @apply border-terminal-error ring-2 ring-terminal-error;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-terminal-accent text-terminal-bg font-bold rounded;
+    @apply hover:bg-opacity-80 transition-colors;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 border border-terminal-accent text-terminal-accent rounded;
+    @apply hover:bg-terminal-accent hover:text-terminal-bg transition-colors;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .terminal-box {
+    @apply border border-terminal-border bg-terminal-bg p-4 rounded;
+  }
+
+  .error-message {
+    @apply text-terminal-error text-sm mt-2;
+  }
+
+  .success-message {
+    @apply text-terminal-text text-sm mt-2;
+  }
+}
