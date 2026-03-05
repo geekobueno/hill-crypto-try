@@ -60,8 +60,8 @@ export default function StepByStep({ steps }: StepByStepProps) {
           className="space-y-6"
         >
           {/* Step description */}
-          <div className="text-center">
-            <h3 className="text-lg font-mono text-green-400 font-semibold">
+          <div className="text-center px-2">
+            <h3 className="text-lg font-mono text-green-400 font-semibold break-words">
               {step.description}
             </h3>
           </div>
@@ -168,15 +168,15 @@ function VectorConversionStep({ step }: { step: CalculationStep }) {
       {step.input.text && (
         <div className="text-center">
           <div className="text-sm font-mono text-green-400/70 mb-2">Texte d'entrée :</div>
-          <div className="text-2xl font-mono text-green-400 font-bold tracking-wider">
+          <div className="text-2xl font-mono text-green-400 font-bold tracking-wider break-all overflow-wrap-anywhere px-2 max-h-32 overflow-y-auto">
             {step.input.text}
           </div>
         </div>
       )}
       
       {step.output.vector && (
-        <div className="flex justify-center items-center gap-4">
-          <svg className="w-6 h-6 text-green-400/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex justify-center items-center gap-4 overflow-x-auto">
+          <svg className="w-6 h-6 text-green-400/50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
           <VectorDisplay 
@@ -195,7 +195,7 @@ function VectorConversionStep({ step }: { step: CalculationStep }) {
 // Helper component for matrix multiplication steps
 function MatrixMultiplicationStep({ step }: { step: CalculationStep }) {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-6">
+    <div className="flex flex-wrap items-center justify-center gap-6 overflow-x-auto">
       {step.input.matrix && (
         <MatrixDisplay 
           matrix={step.input.matrix} 
@@ -204,7 +204,7 @@ function MatrixMultiplicationStep({ step }: { step: CalculationStep }) {
         />
       )}
       
-      <div className="text-3xl font-mono text-green-400/50">×</div>
+      <div className="text-3xl font-mono text-green-400/50 flex-shrink-0">×</div>
       
       {step.input.vector && (
         <VectorDisplay 
@@ -214,7 +214,7 @@ function MatrixMultiplicationStep({ step }: { step: CalculationStep }) {
         />
       )}
       
-      <div className="text-3xl font-mono text-green-400/50">=</div>
+      <div className="text-3xl font-mono text-green-400/50 flex-shrink-0">=</div>
       
       {step.output.vector && (
         <VectorDisplay 
@@ -241,12 +241,12 @@ function ModuloOperationStep({ step }: { step: CalculationStep }) {
       )}
       
       {step.input.vector && step.output.vector && (
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex items-center justify-center gap-6 overflow-x-auto">
           <VectorDisplay 
             vector={step.input.vector} 
             label="Avant modulo"
           />
-          <div className="text-2xl font-mono text-green-400/50">→</div>
+          <div className="text-2xl font-mono text-green-400/50 flex-shrink-0">→</div>
           <VectorDisplay 
             vector={step.output.vector} 
             label="Après modulo 26"

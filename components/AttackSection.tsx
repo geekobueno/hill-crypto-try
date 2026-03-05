@@ -9,9 +9,10 @@ import { generateRandomValidMatrix } from '@/lib/matrixGenerator';
 
 interface AttackSectionProps {
   matrixSize: 2 | 3;
+  onMatrixSizeChange?: (size: 2 | 3) => void;
 }
 
-export default function AttackSection({ matrixSize }: AttackSectionProps) {
+export default function AttackSection({ matrixSize, onMatrixSizeChange }: AttackSectionProps) {
   const [pairs, setPairs] = useState<KnownPair[]>(
     Array(matrixSize).fill(null).map(() => ({ plaintext: '', ciphertext: '' }))
   );
@@ -53,21 +54,54 @@ export default function AttackSection({ matrixSize }: AttackSectionProps) {
     setGeneratedKeyMatrix(keyMatrix);
     
     // Generate random plaintexts and encrypt them
-    const newPairs: KnownPair[] = [];
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    // We need to ensure the plaintext matrix is invertible
+    let newPairs: KnownPair[] = [];
+    let attempts = 0;
+    const maxAttempts = 100;
     
-    for (let i = 0; i < matrixSize; i++) {
-      // Generate random plaintext of exactly matrixSize letters
-      let plaintext = '';
-      for (let j = 0; j < matrixSize; j++) {
-        plaintext += letters[Math.floor(Math.random() * letters.length)];
+    while (attempts < maxAttempts) {
+      newPairs = [];
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      
+      for (let i = 0; i < matrixSize; i++) {
+        // Generate random plaintext of exactly matrixSize letters
+        let plaintext = '';
+        for (let j = 0; j < matrixSize; j++) {
+          plaintext += letters[Math.floor(Math.random() * letters.length)];
+        }
+        
+        // Encrypt the plaintext
+        const encrypted = encrypt(plaintext, keyMatrix);
+        const ciphertext = encrypted.result.substring(0, matrixSize);
+        
+        newPairs.push({ plaintext, ciphertext });
       }
       
-      // Encrypt the plaintext
-      const encrypted = encrypt(plaintext, keyMatrix);
-      const ciphertext = encrypted.result.substring(0, matrixSize);
+      // Test if these pairs would work for the attack
+      const testResult = knownPlaintextAttack(newPairs, matrixSize);
+      if (testResult) {
+        // Success! The plaintext matrix is invertible
+        break;
+      }
       
-      newPairs.push({ plaintext, ciphertext });
+      attempts++;
+    }
+    
+    // If we couldn't generate valid pairs after max attempts, use a fallback
+    if (attempts >= maxAttempts) {
+      // Use predefined valid pairs based on matrix size
+      if (matrixSize === 2) {
+        newPairs = [
+          { plaintext: 'HE', ciphertext: encrypt('HE', keyMatrix).result.substring(0, 2) },
+          { plaintext: 'LP', ciphertext: encrypt('LP', keyMatrix).result.substring(0, 2) }
+        ];
+      } else {
+        newPairs = [
+          { plaintext: 'ACT', ciphertext: encrypt('ACT', keyMatrix).result.substring(0, 3) },
+          { plaintext: 'CAT', ciphertext: encrypt('CAT', keyMatrix).result.substring(0, 3) },
+          { plaintext: 'DOG', ciphertext: encrypt('DOG', keyMatrix).result.substring(0, 3) }
+        ];
+      }
     }
     
     setPairs(newPairs);
@@ -115,16 +149,61 @@ export default function AttackSection({ matrixSize }: AttackSectionProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h2 className="text-xl font-mono font-bold text-red-400">
-          Attaque par texte clair connu
-        </h2>
-        <p className="text-sm font-mono text-gray-400 leading-relaxed">
-          Cette section démontre comment le chiffrement de Hill peut être cassé avec des paires 
-          texte clair-texte chiffré connues. Pour une matrice {matrixSize}×{matrixSize}, vous avez 
-          besoin de {matrixSize} paire{matrixSize > 2 ? 's' : ''}.
-        </p>
+      {/* Header with Matrix Size Selector */}
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-2">
+            <h2 className="text-xl font-mono font-bold text-red-400">
+              Attaque par texte clair connu
+            </h2>
+            <p className="text-sm font-mono text-gray-400 leading-relaxed">
+              Cette section démontre comment le chiffrement de Hill peut être cassé avec des paires 
+              texte clair-texte chiffré connues. Pour une matrice {matrixSize}×{matrixSize}, vous avez 
+              besoin de {matrixSize} paire{matrixSize > 2 ? 's' : ''}.
+            </p>
+          </div>
+          
+          {/* Matrix Size Selector */}
+          {onMatrixSizeChange && (
+            <div className="flex-shrink-0">
+              <div className="text-xs font-mono text-gray-400 mb-2">Taille de la matrice</div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onMatrixSizeChange(2)}
+                  className={`
+                    px-4 py-2 font-mono text-sm font-bold rounded-lg
+                    border-2 transition-all
+                    ${matrixSize === 2
+                      ? 'bg-red-500/20 border-red-500 text-red-400'
+                      : 'bg-black/30 border-gray-600/50 text-gray-400 hover:border-red-500/50 hover:text-red-400/70'
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-red-500
+                  `}
+                  aria-label="Matrice 2×2"
+                  aria-pressed={matrixSize === 2}
+                >
+                  2×2
+                </button>
+                <button
+                  onClick={() => onMatrixSizeChange(3)}
+                  className={`
+                    px-4 py-2 font-mono text-sm font-bold rounded-lg
+                    border-2 transition-all
+                    ${matrixSize === 3
+                      ? 'bg-red-500/20 border-red-500 text-red-400'
+                      : 'bg-black/30 border-gray-600/50 text-gray-400 hover:border-red-500/50 hover:text-red-400/70'
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-red-500
+                  `}
+                  aria-label="Matrice 3×3"
+                  aria-pressed={matrixSize === 3}
+                >
+                  3×3
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Security Warning */}

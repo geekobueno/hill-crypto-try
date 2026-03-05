@@ -23,7 +23,7 @@ export default function VectorDisplay({
   };
 
   return (
-    <div className="inline-flex flex-col items-center gap-2">
+    <div className="inline-flex flex-col items-center gap-2 max-w-full">
       {/* Optional label */}
       {label && (
         <div className="text-xs font-mono text-gray-400">
@@ -32,7 +32,7 @@ export default function VectorDisplay({
       )}
       
       {/* Vector with brackets */}
-      <div className="relative inline-block">
+      <div className="relative inline-block max-w-full">
         {orientation === 'vertical' ? (
           <>
             {/* Top bracket */}
@@ -107,15 +107,16 @@ export default function VectorDisplay({
             
             {/* Vector elements */}
             <div 
-              className="px-4 py-2 flex flex-row gap-2"
+              className="px-4 py-2 flex flex-row gap-2 overflow-x-auto max-w-full"
               role="list"
               aria-label={label || "Vecteur"}
+              style={{ scrollbarWidth: 'thin' }}
             >
               {vector.map((value, i) => (
                 <div
                   key={i}
                   className={`
-                    w-12 h-12 flex items-center justify-center
+                    w-12 h-12 flex items-center justify-center flex-shrink-0
                     font-mono text-lg font-semibold
                     transition-all duration-300
                     ${highlight 
@@ -150,11 +151,11 @@ export default function VectorDisplay({
       
       {/* Optional letter-to-number mapping */}
       {showMapping && (
-        <div className="flex flex-wrap gap-2 justify-center mt-2">
+        <div className="flex flex-wrap gap-2 justify-center mt-2 max-w-full px-2">
           {vector.map((value, i) => (
             <div
               key={i}
-              className="text-xs font-mono text-gray-400"
+              className="text-xs font-mono text-gray-400 flex-shrink-0"
               aria-label={`Correspondance: ${numberToLetter(value)} égale ${value}`}
             >
               {numberToLetter(value)}={value}

@@ -14,6 +14,16 @@ interface ConceptDefinition {
 
 const defaultConcepts: ConceptDefinition[] = [
   {
+    term: 'Matrices valides pour Hill',
+    definition: 'Pour que le chiffrement de Hill fonctionne, la matrice de clé doit être inversible modulo 26. Cela nécessite deux conditions : (1) le déterminant ne doit pas être zéro, et (2) le déterminant doit être copremier avec 26 (pgcd(det, 26) = 1). Si ces conditions ne sont pas remplies, le déchiffrement est impossible car on ne peut pas calculer la matrice inverse.',
+    example: 'Matrice valide : [[3,3],[2,5]] avec det=9, pgcd(9,26)=1 ✓ | Matrice invalide : [[2,4],[1,2]] avec det=0 ✗ | Matrice invalide : [[13,1],[0,1]] avec det=13, pgcd(13,26)=13 ✗'
+  },
+  {
+    term: 'Padding automatique',
+    definition: 'Si la longueur du texte n\'est pas un multiple de la taille de la matrice, l\'algorithme ajoute automatiquement des lettres X à la fin pour compléter le dernier bloc. Cela garantit que tous les vecteurs ont la bonne taille pour la multiplication matricielle.',
+    example: 'Pour une matrice 2×2 : "HELLO" (5 lettres) → "HELLOX" (6 lettres) → vecteurs [7,4], [11,11], [14,23]'
+  },
+  {
     term: 'Déterminant',
     definition: 'Une valeur scalaire calculée à partir d\'une matrice carrée. Pour une matrice 2×2 [a,b;c,d], le déterminant est ad - bc. Le déterminant indique si une matrice est inversible.',
     example: 'Pour [[3,3],[2,5]], det = 3×5 - 3×2 = 15 - 6 = 9'
@@ -37,11 +47,6 @@ const defaultConcepts: ConceptDefinition[] = [
     term: 'Matrice de clé',
     definition: 'Une matrice carrée (2×2 ou 3×3) utilisée pour chiffrer et déchiffrer les messages. Elle doit être inversible modulo 26 pour permettre le déchiffrement.',
     example: 'Une matrice 2×2 valide : [[3,3],[2,5]] avec det = 9, qui est copremier avec 26'
-  },
-  {
-    term: 'Vecteur de texte',
-    definition: 'Une représentation numérique du texte où chaque lettre est convertie en nombre (A=0, B=1, ..., Z=25). Le texte est divisé en vecteurs correspondant à la taille de la matrice.',
-    example: '"HELLO" devient [7,4] et [11,11,14] pour une matrice 2×2'
   },
   {
     term: 'Attaque par texte clair connu',

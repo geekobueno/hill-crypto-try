@@ -12,6 +12,7 @@ import StepByStep from '@/components/StepByStep';
 import Disclaimer from '@/components/Disclaimer';
 import ConceptExplainer from '@/components/ConceptExplainer';
 import AttackSection from '@/components/AttackSection';
+import AlphabetReference from '@/components/AlphabetReference';
 
 export default function Home() {
   // State management
@@ -147,6 +148,9 @@ export default function Home() {
           {/* Disclaimer */}
           <Disclaimer />
 
+          {/* Alphabet Reference */}
+          <AlphabetReference compact={true} />
+
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column: Controls and Inputs */}
@@ -277,7 +281,7 @@ export default function Home() {
 
           {/* Attack Section (Bonus Feature) */}
           <div className="bg-terminal-border/30 rounded-lg border border-terminal-border p-6">
-            <AttackSection matrixSize={matrixSize} />
+            <AttackSection matrixSize={matrixSize} onMatrixSizeChange={handleMatrixSizeChange} />
           </div>
         </div>
       </div>

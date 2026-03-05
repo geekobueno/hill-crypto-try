@@ -103,3 +103,53 @@ body {
   font-size: 0.875rem;
   margin-top: 0.5rem;
 }
+
+/* Custom scrollbar styling for vector displays */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 65, 0.3);
+  border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 65, 0.5);
+}
+
+/* Firefox scrollbar styling */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 65, 0.3) rgba(0, 0, 0, 0.3);
+}
+
+/* Custom scrollbar styling for vertical overflow */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 65, 0.3);
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 65, 0.5);
+}
+
+/* Firefox scrollbar styling for vertical */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 255, 65, 0.3) rgba(0, 0, 0, 0.3);
+}
