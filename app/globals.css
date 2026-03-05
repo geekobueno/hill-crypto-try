@@ -1,44 +1,105 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  body {
-    @apply min-h-screen;
-  }
+@theme {
+  --color-terminal-bg: #0a0e14;
+  --color-terminal-text: #00ff41;
+  --color-terminal-accent: #00d9ff;
+  --color-terminal-error: #ff3333;
+  --color-terminal-warning: #ffaa00;
+  --color-terminal-border: #1a2332;
+  
+  --font-family-mono: "Courier New", monospace;
+  
+  --animate-fade-in: fadeIn 0.3s ease-in;
+  --animate-slide-up: slideUp 0.3s ease-out;
 }
 
-@layer components {
-  .matrix-cell {
-    @apply w-12 h-12 text-center border border-terminal-border bg-terminal-bg text-terminal-text;
-    @apply focus:outline-none focus:ring-2 focus:ring-terminal-accent;
-  }
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
 
-  .matrix-cell-invalid {
-    @apply border-terminal-error ring-2 ring-terminal-error;
-  }
+@keyframes slideUp {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
 
-  .btn-primary {
-    @apply px-4 py-2 bg-terminal-accent text-terminal-bg font-bold rounded;
-    @apply hover:bg-opacity-80 transition-colors;
-    @apply disabled:opacity-50 disabled:cursor-not-allowed;
-  }
+body {
+  min-height: 100vh;
+}
 
-  .btn-secondary {
-    @apply px-4 py-2 border border-terminal-accent text-terminal-accent rounded;
-    @apply hover:bg-terminal-accent hover:text-terminal-bg transition-colors;
-    @apply disabled:opacity-50 disabled:cursor-not-allowed;
-  }
+.matrix-cell {
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  border: 1px solid var(--color-terminal-border);
+  background-color: var(--color-terminal-bg);
+  color: var(--color-terminal-text);
+}
 
-  .terminal-box {
-    @apply border border-terminal-border bg-terminal-bg p-4 rounded;
-  }
+.matrix-cell:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: var(--color-terminal-accent);
+}
 
-  .error-message {
-    @apply text-terminal-error text-sm mt-2;
-  }
+.matrix-cell-invalid {
+  border-color: var(--color-terminal-error);
+  ring: 2px;
+  ring-color: var(--color-terminal-error);
+}
 
-  .success-message {
-    @apply text-terminal-text text-sm mt-2;
-  }
+.btn-primary {
+  padding: 0.5rem 1rem;
+  background-color: var(--color-terminal-accent);
+  color: var(--color-terminal-bg);
+  font-weight: bold;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.8;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-terminal-accent);
+  color: var(--color-terminal-accent);
+  border-radius: 0.25rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-terminal-accent);
+  color: var(--color-terminal-bg);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.terminal-box {
+  border: 1px solid var(--color-terminal-border);
+  background-color: var(--color-terminal-bg);
+  padding: 1rem;
+  border-radius: 0.25rem;
+}
+
+.error-message {
+  color: var(--color-terminal-error);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.success-message {
+  color: var(--color-terminal-text);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }

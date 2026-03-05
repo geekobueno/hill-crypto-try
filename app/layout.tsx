@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Hill Cipher Educational App",
-  description: "Interactive web application for learning the Hill cipher encryption algorithm",
+  title: "Application Éducative du Chiffre de Hill",
+  description: "Application web interactive pour apprendre l'algorithme de chiffrement de Hill à travers des démonstrations visuelles et des calculs étape par étape",
 };
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body className="font-mono bg-terminal-bg text-terminal-text antialiased">
         {children}
       </body>
