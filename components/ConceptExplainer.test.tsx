@@ -12,12 +12,14 @@ describe('ConceptExplainer', () => {
   it('displays all default concept terms', () => {
     render(<ConceptExplainer />);
     
+    expect(screen.getByText('Modulo 26 vs Modulo 37')).toBeInTheDocument();
+    expect(screen.getByText('Matrices valides pour Hill')).toBeInTheDocument();
+    expect(screen.getByText('Padding automatique')).toBeInTheDocument();
     expect(screen.getByText('Déterminant')).toBeInTheDocument();
     expect(screen.getByText('Inverse modulaire')).toBeInTheDocument();
     expect(screen.getByText('Coprimalité')).toBeInTheDocument();
     expect(screen.getByText('Arithmétique modulaire')).toBeInTheDocument();
     expect(screen.getByText('Matrice de clé')).toBeInTheDocument();
-    expect(screen.getByText('Vecteur de texte')).toBeInTheDocument();
   });
 
   it('concepts are initially collapsed', () => {

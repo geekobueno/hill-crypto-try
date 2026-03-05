@@ -1,14 +1,21 @@
 // Core type definitions for Hill Cipher Educational App
 
 /**
+ * Supported modulo values for Hill cipher operations.
+ * - 26: Standard alphabet (A-Z)
+ * - 37: Extended alphabet (A-Z, 0-9, space)
+ */
+export type ModuloType = 26 | 37;
+
+/**
  * Represents a square matrix (2×2 or 3×3) used in Hill cipher operations.
- * Each element should be an integer in the range [0, 25].
+ * Each element should be an integer in the range [0, modulo-1].
  */
 export type Matrix = number[][];
 
 /**
  * Represents a numerical vector used in encryption/decryption.
- * Each element should be an integer in the range [0, 25] representing letters A-Z.
+ * Each element should be an integer in the range [0, modulo-1].
  */
 export type Vector = number[];
 
@@ -86,17 +93,17 @@ export interface CipherResult {
  */
 export interface MatrixValidation {
   /**
-   * Whether the matrix is valid (determinant coprime with 26).
+   * Whether the matrix is valid (determinant coprime with modulo).
    */
   isValid: boolean;
   
   /**
-   * The determinant of the matrix modulo 26.
+   * The determinant of the matrix modulo the specified modulo.
    */
   determinant: number;
   
   /**
-   * The greatest common divisor of the determinant and 26.
+   * The greatest common divisor of the determinant and modulo.
    * Must be 1 for a valid matrix.
    */
   gcd: number;

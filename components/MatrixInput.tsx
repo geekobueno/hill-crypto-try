@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Matrix, MatrixValidation } from '@/lib/types';
-import { validateMatrix } from '@/lib/matrixMath';
+import { Matrix, MatrixValidation, ModuloType } from '@/lib/types';
+import { validateMatrixModulo } from '@/lib/matrixMathModulo';
 
 interface MatrixInputProps {
   size: 2 | 3;
   initialMatrix?: Matrix;
+  modulo: ModuloType;
   onChange: (matrix: Matrix, validation: MatrixValidation) => void;
 }
 
-export default function MatrixInput({ size, initialMatrix, onChange }: MatrixInputProps) {
+export default function MatrixInput({ size, initialMatrix, modulo, onChange }: MatrixInputProps) {
   const [matrix, setMatrix] = useState<Matrix>(
     initialMatrix || Array(size).fill(null).map(() => Array(size).fill(0))
   );
@@ -20,14 +21,14 @@ export default function MatrixInput({ size, initialMatrix, onChange }: MatrixInp
     gcd: 0 
   });
 
-  // Update matrix when size changes
+  // Update matrix when size or modulo changes
   useEffect(() => {
     const newMatrix = initialMatrix || Array(size).fill(null).map(() => Array(size).fill(0));
     setMatrix(newMatrix);
-    const newValidation = validateMatrix(newMatrix);
+    const newValidation = validateMatrixModulo(newMatrix, modulo);
     setValidation(newValidation);
     onChange(newMatrix, newValidation);
-  }, [size, initialMatrix]);
+  }, [size, initialMatrix, modulo]);
 
   const handleCellChange = (row: number, col: number, value: string) => {
     // Parse the input value
@@ -44,7 +45,7 @@ export default function MatrixInput({ size, initialMatrix, onChange }: MatrixInp
     setMatrix(newMatrix);
     
     // Validate the new matrix
-    const newValidation = validateMatrix(newMatrix);
+    const newValidation = validateMatrixModulo(newMatrix, modulo);
     setValidation(newValidation);
     
     // Notify parent component

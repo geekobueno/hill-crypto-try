@@ -1,29 +1,36 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import AttackSection from './AttackSection';
-import * as cryptanalysis from '@/lib/cryptanalysis';
+import * as cryptanalysisModulo from '@/lib/cryptanalysisModulo';
+import { encrypt } from '@/lib/hillCipherModulo';
+import { Matrix } from '@/lib/types';
 
-// Mock the cryptanalysis module
-vi.mock('@/lib/cryptanalysis', () => ({
-  knownPlaintextAttack: vi.fn()
-}));
+// Mock the cryptanalysisModulo module
+vi.mock('@/lib/cryptanalysisModulo', async () => {
+  const actual = await vi.importActual('@/lib/cryptanalysisModulo');
+  return {
+    ...actual,
+    knownPlaintextAttack: vi.fn()
+  };
+});
 
-// Mock the hillCipher module
-vi.mock('@/lib/hillCipher', () => ({
+// Mock the hillCipherModulo module
+vi.mock('@/lib/hillCipherModulo', () => ({
   encrypt: vi.fn(() => ({ result: 'ENCRYPTED', steps: [], keyMatrix: [[1, 0], [0, 1]] }))
 }));
 
-const mockKnownPlaintextAttack = vi.mocked(cryptanalysis.knownPlaintextAttack);
+const mockKnownPlaintextAttack = vi.mocked(cryptanalysisModulo.knownPlaintextAttack);
 
 beforeEach(() => {
   // Reset mock before each test
   mockKnownPlaintextAttack.mockReset();
   
   // Default implementation: return a valid matrix if all pairs have sufficient length
-  mockKnownPlaintextAttack.mockImplementation((pairs, matrixSize) => {
+  mockKnownPlaintextAttack.mockImplementation((pairs, matrixSize, modulo) => {
+    const regex = modulo === 26 ? /[^A-Z]/g : /[^A-Z0-9 ]/g;
     const allValid = pairs.every((pair: any) => {
-      const cleanPlaintext = pair.plaintext.toUpperCase().replace(/[^A-Z]/g, '');
-      const cleanCiphertext = pair.ciphertext.toUpperCase().replace(/[^A-Z]/g, '');
+      const cleanPlaintext = pair.plaintext.toUpperCase().replace(regex, '');
+      const cleanCiphertext = pair.ciphertext.toUpperCase().replace(regex, '');
       return cleanPlaintext.length >= matrixSize && cleanCiphertext.length >= matrixSize;
     });
     
@@ -38,21 +45,21 @@ beforeEach(() => {
 
 describe('AttackSection', () => {
   it('renders with correct title and description', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     expect(screen.getByText('Attaque par texte clair connu')).toBeInTheDocument();
     expect(screen.getByText(/Cette section démontre comment le chiffrement de Hill peut être cassé/)).toBeInTheDocument();
   });
 
   it('displays security warning', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     expect(screen.getByText('Vulnérabilité de sécurité')).toBeInTheDocument();
     expect(screen.getByText(/Cette attaque démontre pourquoi le chiffrement de Hill/)).toBeInTheDocument();
   });
 
   it('renders correct number of input pairs for 2x2 matrix', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     expect(screen.getByText('Paire 1')).toBeInTheDocument();
     expect(screen.getByText('Paire 2')).toBeInTheDocument();
@@ -60,7 +67,7 @@ describe('AttackSection', () => {
   });
 
   it('renders correct number of input pairs for 3x3 matrix', () => {
-    render(<AttackSection matrixSize={3} />);
+    render(<AttackSection matrixSize={3} modulo={26} />);
     
     expect(screen.getByText('Paire 1')).toBeInTheDocument();
     expect(screen.getByText('Paire 2')).toBeInTheDocument();
@@ -68,15 +75,15 @@ describe('AttackSection', () => {
   });
 
   it('displays required number of pairs in description', () => {
-    const { rerender } = render(<AttackSection matrixSize={2} />);
+    const { rerender } = render(<AttackSection matrixSize={2} modulo={26} />);
     expect(screen.getByText(/minimum 2 paire requise/)).toBeInTheDocument();
     
-    rerender(<AttackSection matrixSize={3} />);
+    rerender(<AttackSection matrixSize={3} modulo={26} />);
     expect(screen.getByText(/minimum 3 paires requises/)).toBeInTheDocument();
   });
 
   it('allows input in plaintext and ciphertext fields', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -89,14 +96,14 @@ describe('AttackSection', () => {
   });
 
   it('disables attack button when pairs are incomplete', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const attackButton = screen.getByRole('button', { name: /Lancer l'attaque/ });
     expect(attackButton).toBeDisabled();
   });
 
   it('enables attack button when all pairs have sufficient text', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -112,7 +119,7 @@ describe('AttackSection', () => {
   });
 
   it('displays recovered key matrix when attack succeeds', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -133,7 +140,7 @@ describe('AttackSection', () => {
   });
 
   it('displays mathematical steps when attack succeeds', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -158,7 +165,7 @@ describe('AttackSection', () => {
   });
 
   it('displays security implications note when attack succeeds', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -179,7 +186,7 @@ describe('AttackSection', () => {
   });
 
   it('displays formula when attack succeeds', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -203,7 +210,7 @@ describe('AttackSection', () => {
     // Mock the attack to return null (failure)
     mockKnownPlaintextAttack.mockReturnValueOnce(null);
     
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -224,7 +231,7 @@ describe('AttackSection', () => {
   });
 
   it('resets results when input changes after successful attack', () => {
-    render(<AttackSection matrixSize={2} />);
+    render(<AttackSection matrixSize={2} modulo={26} />);
     
     const plaintextInputs = screen.getAllByPlaceholderText('Ex: HELLO');
     const ciphertextInputs = screen.getAllByPlaceholderText('Ex: HGDAL');
@@ -249,13 +256,13 @@ describe('AttackSection', () => {
   });
 
   it('updates pairs when matrix size changes', () => {
-    const { rerender } = render(<AttackSection matrixSize={2} />);
+    const { rerender } = render(<AttackSection matrixSize={2} modulo={26} />);
     
     expect(screen.getByText('Paire 1')).toBeInTheDocument();
     expect(screen.getByText('Paire 2')).toBeInTheDocument();
     expect(screen.queryByText('Paire 3')).not.toBeInTheDocument();
     
-    rerender(<AttackSection matrixSize={3} />);
+    rerender(<AttackSection matrixSize={3} modulo={26} />);
     
     expect(screen.getByText('Paire 1')).toBeInTheDocument();
     expect(screen.getByText('Paire 2')).toBeInTheDocument();

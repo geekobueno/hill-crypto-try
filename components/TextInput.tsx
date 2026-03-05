@@ -8,6 +8,7 @@ interface TextInputProps {
   label: string;
   placeholder?: string;
   disabled?: boolean;
+  modulo?: 26 | 37;
 }
 
 export default function TextInput({ 
@@ -15,12 +16,14 @@ export default function TextInput({
   onChange, 
   label, 
   placeholder = "Entrez votre texte ici...",
-  disabled = false 
+  disabled = false,
+  modulo = 26
 }: TextInputProps) {
   const [error, setError] = useState<string>('');
   
-  // Process text: uppercase, A-Z only
-  const processedText = value.toUpperCase().replace(/[^A-Z]/g, '');
+  // Process text based on modulo
+  const regex = modulo === 26 ? /[^A-Z]/g : /[^A-Z0-9 ]/g;
+  const processedText = value.toUpperCase().replace(regex, '');
   
   // Validate input
   useEffect(() => {
@@ -79,7 +82,9 @@ export default function TextInput({
         {/* Processed text preview */}
         {processedText && (
           <div className="p-3 bg-black/30 border border-green-500/30 rounded">
-            <div className="text-xs text-gray-400 mb-1">Texte traité (A-Z uniquement):</div>
+            <div className="text-xs text-gray-400 mb-1">
+              Texte traité ({modulo === 26 ? 'A-Z uniquement' : 'A-Z, 0-9, ␣'}):
+            </div>
             <div className="font-mono text-sm text-green-400 break-all">
               {processedText || <span className="text-gray-500 italic">Aucun caractère valide</span>}
             </div>

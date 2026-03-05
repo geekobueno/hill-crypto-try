@@ -14,9 +14,14 @@ interface ConceptDefinition {
 
 const defaultConcepts: ConceptDefinition[] = [
   {
+    term: 'Modulo 26 vs Modulo 37',
+    definition: 'Le chiffre de Hill peut fonctionner avec différents alphabets. Le modulo 26 utilise uniquement les lettres A-Z (alphabet standard). Le modulo 37 étend cela pour inclure les lettres A-Z, les chiffres 0-9, et l\'espace, permettant de chiffrer des messages plus complexes avec des nombres et des espaces.',
+    example: 'Modulo 26 : "HELLO" → lettres uniquement | Modulo 37 : "HELLO 123" → lettres, chiffres et espaces'
+  },
+  {
     term: 'Matrices valides pour Hill',
-    definition: 'Pour que le chiffrement de Hill fonctionne, la matrice de clé doit être inversible modulo 26. Cela nécessite deux conditions : (1) le déterminant ne doit pas être zéro, et (2) le déterminant doit être copremier avec 26 (pgcd(det, 26) = 1). Si ces conditions ne sont pas remplies, le déchiffrement est impossible car on ne peut pas calculer la matrice inverse.',
-    example: 'Matrice valide : [[3,3],[2,5]] avec det=9, pgcd(9,26)=1 ✓ | Matrice invalide : [[2,4],[1,2]] avec det=0 ✗ | Matrice invalide : [[13,1],[0,1]] avec det=13, pgcd(13,26)=13 ✗'
+    definition: 'Pour que le chiffrement de Hill fonctionne, la matrice de clé doit être inversible modulo N (où N est 26 ou 37). Cela nécessite deux conditions : (1) le déterminant ne doit pas être zéro, et (2) le déterminant doit être copremier avec N (pgcd(det, N) = 1). Si ces conditions ne sont pas remplies, le déchiffrement est impossible car on ne peut pas calculer la matrice inverse.',
+    example: 'Pour modulo 26 - Valide : [[3,3],[2,5]] avec det=9, pgcd(9,26)=1 ✓ | Invalide : [[2,4],[1,2]] avec det=0 ✗'
   },
   {
     term: 'Padding automatique',
@@ -40,8 +45,8 @@ const defaultConcepts: ConceptDefinition[] = [
   },
   {
     term: 'Arithmétique modulaire',
-    definition: 'Un système arithmétique pour les entiers où les nombres "s\'enroulent" après avoir atteint une certaine valeur (le module). Dans le chiffre de Hill, nous utilisons modulo 26 pour les 26 lettres de l\'alphabet.',
-    example: '33 mod 26 = 7 (car 33 = 1×26 + 7)'
+    definition: 'Un système arithmétique pour les entiers où les nombres "s\'enroulent" après avoir atteint une certaine valeur (le module). Dans le chiffre de Hill, nous utilisons modulo 26 pour les 26 lettres de l\'alphabet, ou modulo 37 pour un alphabet étendu.',
+    example: '33 mod 26 = 7 (car 33 = 1×26 + 7) | 40 mod 37 = 3 (car 40 = 1×37 + 3)'
   },
   {
     term: 'Matrice de clé',

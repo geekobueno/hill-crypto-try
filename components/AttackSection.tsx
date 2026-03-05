@@ -1,18 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { knownPlaintextAttack, KnownPair } from '@/lib/cryptanalysis';
-import { Matrix } from '@/lib/types';
+import { knownPlaintextAttack, KnownPair } from '@/lib/cryptanalysisModulo';
+import { Matrix, ModuloType } from '@/lib/types';
 import MatrixDisplay from './MatrixDisplay';
-import { encrypt } from '@/lib/hillCipher';
-import { generateRandomValidMatrix } from '@/lib/matrixGenerator';
+import { encrypt } from '@/lib/hillCipherModulo';
+import { generateRandomValidMatrix } from '@/lib/matrixGeneratorModulo';
 
 interface AttackSectionProps {
   matrixSize: 2 | 3;
+  modulo: ModuloType;
   onMatrixSizeChange?: (size: 2 | 3) => void;
 }
 
-export default function AttackSection({ matrixSize, onMatrixSizeChange }: AttackSectionProps) {
+export default function AttackSection({ matrixSize, modulo, onMatrixSizeChange }: AttackSectionProps) {
+  const [attackModulo, setAttackModulo] = useState<ModuloType>(modulo);
   const [pairs, setPairs] = useState<KnownPair[]>(
     Array(matrixSize).fill(null).map(() => ({ plaintext: '', ciphertext: '' }))
   );
@@ -30,6 +32,16 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
       setShowSteps(false);
       setGeneratedKeyMatrix(null);
     }
+  };
+
+  // Handle modulo change
+  const handleAttackModuloChange = (newModulo: ModuloType) => {
+    setAttackModulo(newModulo);
+    // Reset attack results
+    setRecoveredKey(null);
+    setAttackFailed(false);
+    setShowSteps(false);
+    setGeneratedKeyMatrix(null);
   };
 
   // Update when matrixSize prop changes
@@ -50,7 +62,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
 
   const generatePairs = () => {
     // Generate a random valid matrix
-    const keyMatrix = generateRandomValidMatrix(matrixSize);
+    const keyMatrix = generateRandomValidMatrix(matrixSize, attackModulo);
     setGeneratedKeyMatrix(keyMatrix);
     
     // Generate random plaintexts and encrypt them
@@ -59,26 +71,32 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
     let attempts = 0;
     const maxAttempts = 100;
     
+    // For modulo 37, generate longer texts to showcase spaces and numbers
+    const pairLength = attackModulo === 37 ? matrixSize * 3 : matrixSize;
+    
     while (attempts < maxAttempts) {
       newPairs = [];
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      // Choose character set based on modulo
+      const letters = attackModulo === 26 
+        ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ';
       
       for (let i = 0; i < matrixSize; i++) {
-        // Generate random plaintext of exactly matrixSize letters
+        // Generate random plaintext
         let plaintext = '';
-        for (let j = 0; j < matrixSize; j++) {
+        for (let j = 0; j < pairLength; j++) {
           plaintext += letters[Math.floor(Math.random() * letters.length)];
         }
         
         // Encrypt the plaintext
-        const encrypted = encrypt(plaintext, keyMatrix);
-        const ciphertext = encrypted.result.substring(0, matrixSize);
+        const encrypted = encrypt(plaintext, keyMatrix, attackModulo);
+        const ciphertext = encrypted.result.substring(0, pairLength);
         
         newPairs.push({ plaintext, ciphertext });
       }
       
       // Test if these pairs would work for the attack
-      const testResult = knownPlaintextAttack(newPairs, matrixSize);
+      const testResult = knownPlaintextAttack(newPairs, matrixSize, attackModulo);
       if (testResult) {
         // Success! The plaintext matrix is invertible
         break;
@@ -89,18 +107,34 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
     
     // If we couldn't generate valid pairs after max attempts, use a fallback
     if (attempts >= maxAttempts) {
-      // Use predefined valid pairs based on matrix size
-      if (matrixSize === 2) {
-        newPairs = [
-          { plaintext: 'HE', ciphertext: encrypt('HE', keyMatrix).result.substring(0, 2) },
-          { plaintext: 'LP', ciphertext: encrypt('LP', keyMatrix).result.substring(0, 2) }
-        ];
+      // Use predefined valid pairs based on matrix size and modulo
+      if (attackModulo === 26) {
+        if (matrixSize === 2) {
+          newPairs = [
+            { plaintext: 'HE', ciphertext: encrypt('HE', keyMatrix, attackModulo).result.substring(0, 2) },
+            { plaintext: 'LP', ciphertext: encrypt('LP', keyMatrix, attackModulo).result.substring(0, 2) }
+          ];
+        } else {
+          newPairs = [
+            { plaintext: 'ACT', ciphertext: encrypt('ACT', keyMatrix, attackModulo).result.substring(0, 3) },
+            { plaintext: 'CAT', ciphertext: encrypt('CAT', keyMatrix, attackModulo).result.substring(0, 3) },
+            { plaintext: 'DOG', ciphertext: encrypt('DOG', keyMatrix, attackModulo).result.substring(0, 3) }
+          ];
+        }
       } else {
-        newPairs = [
-          { plaintext: 'ACT', ciphertext: encrypt('ACT', keyMatrix).result.substring(0, 3) },
-          { plaintext: 'CAT', ciphertext: encrypt('CAT', keyMatrix).result.substring(0, 3) },
-          { plaintext: 'DOG', ciphertext: encrypt('DOG', keyMatrix).result.substring(0, 3) }
-        ];
+        // Modulo 37 - use longer texts with numbers and spaces
+        if (matrixSize === 2) {
+          newPairs = [
+            { plaintext: 'HELLO 1', ciphertext: encrypt('HELLO 1', keyMatrix, attackModulo).result.substring(0, 7) },
+            { plaintext: 'WORLD 2', ciphertext: encrypt('WORLD 2', keyMatrix, attackModulo).result.substring(0, 7) }
+          ];
+        } else {
+          newPairs = [
+            { plaintext: 'CODE 123', ciphertext: encrypt('CODE 123', keyMatrix, attackModulo).result.substring(0, 8) },
+            { plaintext: 'TEST 456', ciphertext: encrypt('TEST 456', keyMatrix, attackModulo).result.substring(0, 8) },
+            { plaintext: 'DATA 789', ciphertext: encrypt('DATA 789', keyMatrix, attackModulo).result.substring(0, 8) }
+          ];
+        }
       }
     }
     
@@ -115,8 +149,10 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
   const handleAttack = () => {
     // Validate that all pairs have sufficient text
     const validPairs = pairs.every(pair => {
-      const cleanPlaintext = pair.plaintext.toUpperCase().replace(/[^A-Z]/g, '');
-      const cleanCiphertext = pair.ciphertext.toUpperCase().replace(/[^A-Z]/g, '');
+      // Use appropriate regex based on attackModulo
+      const regex = attackModulo === 26 ? /[^A-Z]/g : /[^A-Z0-9 ]/g;
+      const cleanPlaintext = pair.plaintext.toUpperCase().replace(regex, '');
+      const cleanCiphertext = pair.ciphertext.toUpperCase().replace(regex, '');
       return cleanPlaintext.length >= matrixSize && cleanCiphertext.length >= matrixSize;
     });
 
@@ -128,7 +164,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
     }
 
     // Attempt the attack
-    const result = knownPlaintextAttack(pairs, matrixSize);
+    const result = knownPlaintextAttack(pairs, matrixSize, attackModulo);
     
     if (result) {
       setRecoveredKey(result);
@@ -142,8 +178,10 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
   };
 
   const canAttemptAttack = pairs.every(pair => {
-    const cleanPlaintext = pair.plaintext.toUpperCase().replace(/[^A-Z]/g, '');
-    const cleanCiphertext = pair.ciphertext.toUpperCase().replace(/[^A-Z]/g, '');
+    // Use appropriate regex based on attackModulo
+    const regex = attackModulo === 26 ? /[^A-Z]/g : /[^A-Z0-9 ]/g;
+    const cleanPlaintext = pair.plaintext.toUpperCase().replace(regex, '');
+    const cleanCiphertext = pair.ciphertext.toUpperCase().replace(regex, '');
     return cleanPlaintext.length >= matrixSize && cleanCiphertext.length >= matrixSize;
   });
 
@@ -204,6 +242,60 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
             </div>
           )}
         </div>
+
+        {/* Modulo Selector for Attack */}
+        <div className="bg-terminal-border/30 rounded-lg border border-terminal-border p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-mono font-bold text-red-400 mb-1">
+                Mode de l'attaque
+              </h3>
+              <p className="text-xs font-mono text-gray-400">
+                Choisissez le jeu de caractères pour l'attaque
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleAttackModuloChange(26)}
+                className={`
+                  px-4 py-2 font-mono text-sm font-bold rounded-lg
+                  border-2 transition-all
+                  ${attackModulo === 26
+                    ? 'bg-red-500/20 border-red-500 text-red-400'
+                    : 'bg-black/30 border-gray-600/50 text-gray-400 hover:border-red-500/50 hover:text-red-400/70'
+                  }
+                  focus:outline-none focus:ring-2 focus:ring-red-500
+                `}
+                aria-label="Modulo 26 (A-Z)"
+                aria-pressed={attackModulo === 26}
+              >
+                <div className="text-center">
+                  <div className="text-base">Modulo 26</div>
+                  <div className="text-xs opacity-70">A-Z</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleAttackModuloChange(37)}
+                className={`
+                  px-4 py-2 font-mono text-sm font-bold rounded-lg
+                  border-2 transition-all
+                  ${attackModulo === 37
+                    ? 'bg-red-500/20 border-red-500 text-red-400'
+                    : 'bg-black/30 border-gray-600/50 text-gray-400 hover:border-red-500/50 hover:text-red-400/70'
+                  }
+                  focus:outline-none focus:ring-2 focus:ring-red-500
+                `}
+                aria-label="Modulo 37 (A-Z, 0-9, espace)"
+                aria-pressed={attackModulo === 37}
+              >
+                <div className="text-center">
+                  <div className="text-base">Modulo 37</div>
+                  <div className="text-xs opacity-70">A-Z, 0-9, ␣</div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Security Warning */}
@@ -240,7 +332,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-mono font-semibold text-green-400">
-            Paires connues (minimum {matrixSize} paire{matrixSize > 2 ? 's' : ''} requise{matrixSize > 2 ? 's' : ''})
+            Paires connues (minimum {matrixSize} paire{matrixSize > 2 ? 's' : ''} requise{matrixSize > 2 ? 's' : ''}) - {attackModulo === 26 ? 'A-Z' : 'A-Z, 0-9, ␣'}
           </h3>
           
           {/* Generate Pairs Button */}
@@ -313,14 +405,14 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
                   htmlFor={`plaintext-${index}`}
                   className="block text-xs font-mono text-green-400/70"
                 >
-                  Texte clair (min. {matrixSize} lettres)
+                  Texte clair (min. {matrixSize} {attackModulo === 26 ? 'lettres' : 'caractères'})
                 </label>
                 <input
                   id={`plaintext-${index}`}
                   type="text"
                   value={pair.plaintext}
                   onChange={(e) => handlePairChange(index, 'plaintext', e.target.value)}
-                  placeholder="Ex: HELLO"
+                  placeholder={attackModulo === 26 ? "Ex: HELLO" : "Ex: HELLO 123"}
                   className="
                     w-full px-3 py-2 font-mono text-sm
                     bg-black/50 border border-green-500/30 rounded
@@ -338,14 +430,14 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
                   htmlFor={`ciphertext-${index}`}
                   className="block text-xs font-mono text-green-400/70"
                 >
-                  Texte chiffré (min. {matrixSize} lettres)
+                  Texte chiffré (min. {matrixSize} {attackModulo === 26 ? 'lettres' : 'caractères'})
                 </label>
                 <input
                   id={`ciphertext-${index}`}
                   type="text"
                   value={pair.ciphertext}
                   onChange={(e) => handlePairChange(index, 'ciphertext', e.target.value)}
-                  placeholder="Ex: HGDAL"
+                  placeholder={attackModulo === 26 ? "Ex: HGDAL" : "Ex: XYZ 789 AB"}
                   className="
                     w-full px-3 py-2 font-mono text-sm
                     bg-black/50 border border-green-500/30 rounded
@@ -412,7 +504,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
               <ul className="text-xs font-mono text-red-400/80 list-disc list-inside ml-2 space-y-1">
                 <li>Chaque paire a au moins {matrixSize} lettres</li>
                 <li>Les paires sont valides (texte chiffré correspond au texte clair)</li>
-                <li>La matrice de texte clair est inversible modulo 26</li>
+                <li>La matrice de texte clair est inversible modulo {attackModulo}</li>
               </ul>
             </div>
           </div>
@@ -479,7 +571,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
                 <div className="space-y-2">
                   <div className="text-green-400 font-semibold">Étape 2 : Équation matricielle</div>
                   <div className="ml-4 space-y-1">
-                    <div>• Dans le chiffrement de Hill : C = K × P (mod 26)</div>
+                    <div>• Dans le chiffrement de Hill : C = K × P (mod {attackModulo})</div>
                     <div>• Où K est la matrice de clé inconnue que nous voulons trouver</div>
                   </div>
                 </div>
@@ -487,7 +579,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
                 <div className="space-y-2">
                   <div className="text-green-400 font-semibold">Étape 3 : Calcul de l'inverse</div>
                   <div className="ml-4 space-y-1">
-                    <div>• Calculer P⁻¹ (l'inverse de la matrice de texte clair modulo 26)</div>
+                    <div>• Calculer P⁻¹ (l'inverse de la matrice de texte clair modulo {attackModulo})</div>
                     <div>• Si P n'est pas inversible, l'attaque échoue</div>
                   </div>
                 </div>
@@ -495,7 +587,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
                 <div className="space-y-2">
                   <div className="text-green-400 font-semibold">Étape 4 : Récupération de la clé</div>
                   <div className="ml-4 space-y-1">
-                    <div>• Résoudre pour K : K = C × P⁻¹ (mod 26)</div>
+                    <div>• Résoudre pour K : K = C × P⁻¹ (mod {attackModulo})</div>
                     <div>• La matrice résultante est la clé secrète récupérée</div>
                   </div>
                 </div>
@@ -503,7 +595,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
                 <div className="space-y-2">
                   <div className="text-green-400 font-semibold">Étape 5 : Vérification</div>
                   <div className="ml-4 space-y-1">
-                    <div>• Vérifier que K × P ≡ C (mod 26)</div>
+                    <div>• Vérifier que K × P ≡ C (mod {attackModulo})</div>
                     <div>• La clé récupérée peut maintenant déchiffrer tous les messages</div>
                   </div>
                 </div>
@@ -513,7 +605,7 @@ export default function AttackSection({ matrixSize, onMatrixSizeChange }: Attack
               <div className="bg-black/50 border border-green-500/20 rounded p-4 mt-4">
                 <div className="text-center font-mono text-green-400 space-y-2">
                   <div className="text-sm">Formule de l'attaque :</div>
-                  <div className="text-lg font-bold">K = C × P⁻¹ (mod 26)</div>
+                  <div className="text-lg font-bold">K = C × P⁻¹ (mod {attackModulo})</div>
                 </div>
               </div>
             </div>

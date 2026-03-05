@@ -25,19 +25,46 @@ interface ExtendedGCDResult {
  * - Returns coefficients x, y where a*x + b*y = gcd(a, b)
  */
 export function gcdExtended(a: number, b: number): ExtendedGCDResult {
+  // Ensure both numbers are non-negative integers
+  a = Math.abs(Math.round(a));
+  b = Math.abs(Math.round(b));
+  
+  // Handle edge cases
+  if (isNaN(a) || isNaN(b) || !isFinite(a) || !isFinite(b)) {
+    return { gcd: 0, x: 0, y: 0 };
+  }
+  
   // Base case: if b is 0, gcd is a
   if (b === 0) {
     return { gcd: a, x: 1, y: 0 };
   }
   
-  // Recursive call
-  const result = gcdExtended(b, a % b);
+  // Base case: if a is 0, gcd is b
+  if (a === 0) {
+    return { gcd: b, x: 0, y: 1 };
+  }
   
-  // Update x and y using results of recursive call
-  const x = result.y;
-  const y = result.x - Math.floor(a / b) * result.y;
+  // Use iterative approach to avoid stack overflow
+  let x0 = 1, x1 = 0;
+  let y0 = 0, y1 = 1;
+  let a0 = a, b0 = b;
   
-  return { gcd: result.gcd, x, y };
+  while (b0 !== 0) {
+    const q = Math.floor(a0 / b0);
+    const temp_b = b0;
+    b0 = a0 % b0;
+    a0 = temp_b;
+    
+    const temp_x = x1;
+    x1 = x0 - q * x1;
+    x0 = temp_x;
+    
+    const temp_y = y1;
+    y1 = y0 - q * y1;
+    y0 = temp_y;
+  }
+  
+  return { gcd: a0, x: x0, y: y0 };
 }
 
 /**

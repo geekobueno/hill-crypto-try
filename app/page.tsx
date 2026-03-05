@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Matrix, MatrixValidation, CipherResult } from '@/lib/types';
-import { encrypt, decrypt } from '@/lib/hillCipher';
-import { generateRandomValidMatrix } from '@/lib/matrixGenerator';
+import { Matrix, MatrixValidation, CipherResult, ModuloType } from '@/lib/types';
+import { encrypt, decrypt } from '@/lib/hillCipherModulo';
+import { generateRandomValidMatrix } from '@/lib/matrixGeneratorModulo';
+import { validateMatrixModulo } from '@/lib/matrixMathModulo';
 import MatrixInput from '@/components/MatrixInput';
 import TextInput from '@/components/TextInput';
 import ControlPanel from '@/components/ControlPanel';
@@ -17,6 +18,7 @@ import AlphabetReference from '@/components/AlphabetReference';
 export default function Home() {
   // State management
   const [matrixSize, setMatrixSize] = useState<2 | 3>(2);
+  const [modulo, setModulo] = useState<ModuloType>(26);
   const [matrix, setMatrix] = useState<Matrix>([[3, 3], [2, 5]]);
   const [matrixValidation, setMatrixValidation] = useState<MatrixValidation>({
     isValid: true,
@@ -28,6 +30,17 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string>('');
 
+  // Handle modulo change
+  const handleModuloChange = (newModulo: ModuloType) => {
+    setModulo(newModulo);
+    // Revalidate matrix with new modulo
+    const validation = validateMatrixModulo(matrix, newModulo);
+    setMatrixValidation(validation);
+    // Clear results
+    setResult(null);
+    setError('');
+  };
+
   // Handle matrix size change
   const handleMatrixSizeChange = (newSize: 2 | 3) => {
     setMatrixSize(newSize);
@@ -36,6 +49,9 @@ export default function Home() {
       ? [[3, 3], [2, 5]] 
       : [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
     setMatrix(defaultMatrix);
+    // Revalidate with current modulo
+    const validation = validateMatrixModulo(defaultMatrix, modulo);
+    setMatrixValidation(validation);
     // Clear results
     setResult(null);
     setError('');
@@ -63,7 +79,7 @@ export default function Home() {
   // Handle encryption
   const handleEncrypt = () => {
     // Validate inputs
-    const cleanText = text.toUpperCase().replace(/[^A-Z]/g, '');
+    const cleanText = text.trim();
     
     if (!cleanText) {
       setError('Veuillez entrer du texte à chiffrer');
@@ -79,7 +95,7 @@ export default function Home() {
     setError('');
     
     try {
-      const encryptResult = encrypt(cleanText, matrix);
+      const encryptResult = encrypt(cleanText, matrix, modulo);
       setResult(encryptResult);
     } catch (err) {
       setError(`Erreur lors du chiffrement: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
@@ -92,7 +108,7 @@ export default function Home() {
   // Handle decryption
   const handleDecrypt = () => {
     // Validate inputs
-    const cleanText = text.toUpperCase().replace(/[^A-Z]/g, '');
+    const cleanText = text.trim();
     
     if (!cleanText) {
       setError('Veuillez entrer du texte à déchiffrer');
@@ -108,7 +124,7 @@ export default function Home() {
     setError('');
     
     try {
-      const decryptResult = decrypt(cleanText, matrix);
+      const decryptResult = decrypt(cleanText, matrix, modulo);
       setResult(decryptResult);
     } catch (err) {
       setError(`Erreur lors du déchiffrement: ${err instanceof Error ? err.message : 'Erreur inconnue'}`);
@@ -120,14 +136,16 @@ export default function Home() {
 
   // Handle random matrix generation
   const handleGenerateMatrix = () => {
-    const newMatrix = generateRandomValidMatrix(matrixSize);
+    const newMatrix = generateRandomValidMatrix(matrixSize, modulo);
     setMatrix(newMatrix);
-    // The MatrixInput component will handle validation
+    // Revalidate with current modulo
+    const validation = validateMatrixModulo(newMatrix, modulo);
+    setMatrixValidation(validation);
     setError('');
   };
 
   // Check if encrypt/decrypt buttons should be disabled
-  const cleanText = text.toUpperCase().replace(/[^A-Z]/g, '');
+  const cleanText = text.trim();
   const encryptDisabled = !cleanText || !matrixValidation.isValid || isProcessing;
   const decryptDisabled = !cleanText || !matrixValidation.isValid || isProcessing;
 
@@ -148,8 +166,62 @@ export default function Home() {
           {/* Disclaimer */}
           <Disclaimer />
 
+          {/* Modulo Selector */}
+          <div className="bg-terminal-border/30 rounded-lg border border-terminal-border p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-mono font-bold text-green-400 mb-2">
+                  Mode de chiffrement
+                </h3>
+                <p className="text-sm font-mono text-gray-400">
+                  Choisissez le jeu de caractères à utiliser
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleModuloChange(26)}
+                  className={`
+                    px-6 py-3 font-mono text-sm font-bold rounded-lg
+                    border-2 transition-all
+                    ${modulo === 26
+                      ? 'bg-green-500/20 border-green-500 text-green-400'
+                      : 'bg-black/30 border-gray-600/50 text-gray-400 hover:border-green-500/50 hover:text-green-400/70'
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-green-500
+                  `}
+                  aria-label="Modulo 26 (A-Z)"
+                  aria-pressed={modulo === 26}
+                >
+                  <div className="text-center">
+                    <div className="text-lg">Modulo 26</div>
+                    <div className="text-xs opacity-70">A-Z</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleModuloChange(37)}
+                  className={`
+                    px-6 py-3 font-mono text-sm font-bold rounded-lg
+                    border-2 transition-all
+                    ${modulo === 37
+                      ? 'bg-green-500/20 border-green-500 text-green-400'
+                      : 'bg-black/30 border-gray-600/50 text-gray-400 hover:border-green-500/50 hover:text-green-400/70'
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-green-500
+                  `}
+                  aria-label="Modulo 37 (A-Z, 0-9, espace)"
+                  aria-pressed={modulo === 37}
+                >
+                  <div className="text-center">
+                    <div className="text-lg">Modulo 37</div>
+                    <div className="text-xs opacity-70">A-Z, 0-9, ␣</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Alphabet Reference */}
-          <AlphabetReference compact={true} />
+          <AlphabetReference compact={true} modulo={modulo} />
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -180,6 +252,7 @@ export default function Home() {
                 <MatrixInput
                   size={matrixSize}
                   initialMatrix={matrix}
+                  modulo={modulo}
                   onChange={handleMatrixChange}
                 />
               </div>
@@ -192,6 +265,7 @@ export default function Home() {
                   label="Texte d'entrée"
                   placeholder="Entrez votre texte ici..."
                   disabled={isProcessing}
+                  modulo={modulo}
                 />
               </div>
             </div>
@@ -281,7 +355,7 @@ export default function Home() {
 
           {/* Attack Section (Bonus Feature) */}
           <div className="bg-terminal-border/30 rounded-lg border border-terminal-border p-6">
-            <AttackSection matrixSize={matrixSize} onMatrixSizeChange={handleMatrixSizeChange} />
+            <AttackSection matrixSize={matrixSize} modulo={modulo} onMatrixSizeChange={handleMatrixSizeChange} />
           </div>
         </div>
       </div>

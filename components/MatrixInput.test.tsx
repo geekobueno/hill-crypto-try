@@ -6,7 +6,7 @@ import { Matrix, MatrixValidation } from '@/lib/types';
 describe('MatrixInput', () => {
   it('renders a 2x2 matrix grid', () => {
     const onChange = vi.fn();
-    render(<MatrixInput size={2} onChange={onChange} />);
+    render(<MatrixInput size={2} modulo={26} onChange={onChange} />);
     
     // Should have 4 input fields for 2x2 matrix
     const inputs = screen.getAllByRole('spinbutton');
@@ -15,7 +15,7 @@ describe('MatrixInput', () => {
 
   it('renders a 3x3 matrix grid', () => {
     const onChange = vi.fn();
-    render(<MatrixInput size={3} onChange={onChange} />);
+    render(<MatrixInput size={3} modulo={26} onChange={onChange} />);
     
     // Should have 9 input fields for 3x3 matrix
     const inputs = screen.getAllByRole('spinbutton');
@@ -25,7 +25,7 @@ describe('MatrixInput', () => {
   it('initializes with provided initial matrix', () => {
     const onChange = vi.fn();
     const initialMatrix: Matrix = [[3, 3], [2, 5]];
-    render(<MatrixInput size={2} initialMatrix={initialMatrix} onChange={onChange} />);
+    render(<MatrixInput size={2} initialMatrix={initialMatrix} modulo={26} onChange={onChange} />);
     
     const inputs = screen.getAllByRole('spinbutton') as HTMLInputElement[];
     expect(inputs[0].value).toBe('3');
@@ -36,7 +36,7 @@ describe('MatrixInput', () => {
 
   it('calls onChange when a cell value changes', () => {
     const onChange = vi.fn();
-    render(<MatrixInput size={2} onChange={onChange} />);
+    render(<MatrixInput size={2} modulo={26} onChange={onChange} />);
     
     const inputs = screen.getAllByRole('spinbutton') as HTMLInputElement[];
     fireEvent.change(inputs[0], { target: { value: '5' } });
@@ -48,7 +48,7 @@ describe('MatrixInput', () => {
 
   it('constrains input values to [0, 25]', () => {
     const onChange = vi.fn();
-    render(<MatrixInput size={2} onChange={onChange} />);
+    render(<MatrixInput size={2} modulo={26} onChange={onChange} />);
     
     const inputs = screen.getAllByRole('spinbutton') as HTMLInputElement[];
     
@@ -67,7 +67,7 @@ describe('MatrixInput', () => {
     const onChange = vi.fn();
     // Valid matrix: [[3, 3], [2, 5]] has det = 9, gcd(9, 26) = 1
     const validMatrix: Matrix = [[3, 3], [2, 5]];
-    render(<MatrixInput size={2} initialMatrix={validMatrix} onChange={onChange} />);
+    render(<MatrixInput size={2} initialMatrix={validMatrix} modulo={26} onChange={onChange} />);
     
     // Should show valid feedback
     expect(screen.getByText('La matrice est valide pour le chiffrement')).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe('MatrixInput', () => {
     const onChange = vi.fn();
     // Invalid matrix: [[2, 4], [1, 2]] has det = 0, not coprime with 26
     const invalidMatrix: Matrix = [[2, 4], [1, 2]];
-    render(<MatrixInput size={2} initialMatrix={invalidMatrix} onChange={onChange} />);
+    render(<MatrixInput size={2} initialMatrix={invalidMatrix} modulo={26} onChange={onChange} />);
     
     // Should show error feedback
     expect(screen.getByText(/n'est pas premier avec 26/)).toBeInTheDocument();
@@ -87,7 +87,7 @@ describe('MatrixInput', () => {
 
   it('re-validates matrix on every cell change', () => {
     const onChange = vi.fn();
-    render(<MatrixInput size={2} onChange={onChange} />);
+    render(<MatrixInput size={2} modulo={26} onChange={onChange} />);
     
     const inputs = screen.getAllByRole('spinbutton') as HTMLInputElement[];
     
