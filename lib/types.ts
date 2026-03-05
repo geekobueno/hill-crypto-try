@@ -8,10 +8,15 @@
 export type ModuloType = 26 | 37;
 
 /**
- * Represents a square matrix (2×2 or 3×3) used in Hill cipher operations.
+ * Represents a square matrix (2×2, 3×3, or 4×4) used in Hill cipher operations.
  * Each element should be an integer in the range [0, modulo-1].
  */
 export type Matrix = number[][];
+
+/**
+ * Supported matrix sizes for Hill cipher operations.
+ */
+export type MatrixSize = 2 | 3 | 4;
 
 /**
  * Represents a numerical vector used in encryption/decryption.

@@ -8,9 +8,9 @@ import { encrypt } from '@/lib/hillCipherModulo';
 import { generateRandomValidMatrix } from '@/lib/matrixGeneratorModulo';
 
 interface AttackSectionProps {
-  matrixSize: 2 | 3;
+  matrixSize: 2 | 3 | 4;
   modulo: ModuloType;
-  onMatrixSizeChange?: (size: 2 | 3) => void;
+  onMatrixSizeChange?: (size: 2 | 3 | 4) => void;
 }
 
 export default function AttackSection({ matrixSize, modulo, onMatrixSizeChange }: AttackSectionProps) {
@@ -114,11 +114,18 @@ export default function AttackSection({ matrixSize, modulo, onMatrixSizeChange }
             { plaintext: 'HE', ciphertext: encrypt('HE', keyMatrix, attackModulo).result.substring(0, 2) },
             { plaintext: 'LP', ciphertext: encrypt('LP', keyMatrix, attackModulo).result.substring(0, 2) }
           ];
-        } else {
+        } else if (matrixSize === 3) {
           newPairs = [
             { plaintext: 'ACT', ciphertext: encrypt('ACT', keyMatrix, attackModulo).result.substring(0, 3) },
             { plaintext: 'CAT', ciphertext: encrypt('CAT', keyMatrix, attackModulo).result.substring(0, 3) },
             { plaintext: 'DOG', ciphertext: encrypt('DOG', keyMatrix, attackModulo).result.substring(0, 3) }
+          ];
+        } else {
+          newPairs = [
+            { plaintext: 'HELP', ciphertext: encrypt('HELP', keyMatrix, attackModulo).result.substring(0, 4) },
+            { plaintext: 'CODE', ciphertext: encrypt('CODE', keyMatrix, attackModulo).result.substring(0, 4) },
+            { plaintext: 'TEST', ciphertext: encrypt('TEST', keyMatrix, attackModulo).result.substring(0, 4) },
+            { plaintext: 'DATA', ciphertext: encrypt('DATA', keyMatrix, attackModulo).result.substring(0, 4) }
           ];
         }
       } else {
@@ -128,11 +135,18 @@ export default function AttackSection({ matrixSize, modulo, onMatrixSizeChange }
             { plaintext: 'HELLO 1', ciphertext: encrypt('HELLO 1', keyMatrix, attackModulo).result.substring(0, 7) },
             { plaintext: 'WORLD 2', ciphertext: encrypt('WORLD 2', keyMatrix, attackModulo).result.substring(0, 7) }
           ];
-        } else {
+        } else if (matrixSize === 3) {
           newPairs = [
             { plaintext: 'CODE 123', ciphertext: encrypt('CODE 123', keyMatrix, attackModulo).result.substring(0, 8) },
             { plaintext: 'TEST 456', ciphertext: encrypt('TEST 456', keyMatrix, attackModulo).result.substring(0, 8) },
             { plaintext: 'DATA 789', ciphertext: encrypt('DATA 789', keyMatrix, attackModulo).result.substring(0, 8) }
+          ];
+        } else {
+          newPairs = [
+            { plaintext: 'HELP 1234', ciphertext: encrypt('HELP 1234', keyMatrix, attackModulo).result.substring(0, 9) },
+            { plaintext: 'CODE 5678', ciphertext: encrypt('CODE 5678', keyMatrix, attackModulo).result.substring(0, 9) },
+            { plaintext: 'TEST 9012', ciphertext: encrypt('TEST 9012', keyMatrix, attackModulo).result.substring(0, 9) },
+            { plaintext: 'DATA 3456', ciphertext: encrypt('DATA 3456', keyMatrix, attackModulo).result.substring(0, 9) }
           ];
         }
       }
@@ -237,6 +251,22 @@ export default function AttackSection({ matrixSize, modulo, onMatrixSizeChange }
                   aria-pressed={matrixSize === 3}
                 >
                   3×3
+                </button>
+                <button
+                  onClick={() => onMatrixSizeChange(4)}
+                  className={`
+                    px-4 py-2 font-mono text-sm font-bold rounded-lg
+                    border-2 transition-all
+                    ${matrixSize === 4
+                      ? 'bg-red-500/20 border-red-500 text-red-400'
+                      : 'bg-black/30 border-gray-600/50 text-gray-400 hover:border-red-500/50 hover:text-red-400/70'
+                    }
+                    focus:outline-none focus:ring-2 focus:ring-red-500
+                  `}
+                  aria-label="Matrice 4×4"
+                  aria-pressed={matrixSize === 4}
+                >
+                  4×4
                 </button>
               </div>
             </div>

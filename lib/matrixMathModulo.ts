@@ -16,6 +16,27 @@ export function modInverseGeneric(a: number, m: number): number | null {
 }
 
 /**
+ * Calculates the cofactor of a matrix at position (row, col).
+ */
+function getCofactor(matrix: Matrix, row: number, col: number): number {
+  const n = matrix.length;
+  const minor: Matrix = [];
+  
+  for (let i = 0; i < n; i++) {
+    if (i === row) continue;
+    const minorRow: number[] = [];
+    for (let j = 0; j < n; j++) {
+      if (j === col) continue;
+      minorRow.push(matrix[i][j]);
+    }
+    minor.push(minorRow);
+  }
+  
+  const sign = (row + col) % 2 === 0 ? 1 : -1;
+  return sign * matrixDeterminant(minor);
+}
+
+/**
  * Calculates the inverse of a matrix modulo m.
  */
 export function matrixInverseModulo(matrix: Matrix, modulo: ModuloType): Matrix | null {
@@ -78,6 +99,26 @@ export function matrixInverseModulo(matrix: Matrix, modulo: ModuloType): Matrix 
     }
     
     return inverse;
+  } else if (n === 4) {
+    // For 4×4, use cofactor matrix method
+    const cofactor: Matrix = Array(4).fill(null).map(() => Array(4).fill(0));
+    
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        cofactor[i][j] = getCofactor(matrix, i, j);
+      }
+    }
+    
+    // Transpose cofactor matrix and multiply by determinant inverse
+    const inverse: Matrix = Array(4).fill(null).map(() => Array(4).fill(0));
+    
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        inverse[i][j] = ((detInverse * cofactor[j][i]) % modulo + modulo) % modulo;
+      }
+    }
+    
+    return inverse;
   }
   
   throw new Error(`Unsupported matrix size: ${n}×${n}`);
@@ -126,12 +167,12 @@ export function multiplyMatricesModulo(a: Matrix, b: Matrix, modulo: ModuloType)
  */
 export function validateMatrixModulo(matrix: Matrix, modulo: ModuloType): MatrixValidation {
   const n = matrix.length;
-  if (n !== 2 && n !== 3) {
+  if (n !== 2 && n !== 3 && n !== 4) {
     return { 
       isValid: false, 
       determinant: 0, 
       gcd: 0, 
-      error: 'La matrice doit être 2×2 ou 3×3' 
+      error: 'La matrice doit être 2×2, 3×3 ou 4×4' 
     };
   }
   

@@ -210,12 +210,12 @@ describe('matrixMathModulo', () => {
       expect(validation.error).toContain('carrée');
     });
 
-    it('rejects matrix that is not 2x2 or 3x3', () => {
+    it('rejects matrix that is not 2x2, 3x3, or 4x4', () => {
       const matrix: Matrix = [[1]];
       const validation = validateMatrixModulo(matrix, 26);
       
       expect(validation.isValid).toBe(false);
-      expect(validation.error).toContain('2×2 ou 3×3');
+      expect(validation.error).toContain('2×2, 3×3 ou 4×4');
     });
   });
 });

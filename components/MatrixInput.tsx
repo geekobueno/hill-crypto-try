@@ -5,7 +5,7 @@ import { Matrix, MatrixValidation, ModuloType } from '@/lib/types';
 import { validateMatrixModulo } from '@/lib/matrixMathModulo';
 
 interface MatrixInputProps {
-  size: 2 | 3;
+  size: 2 | 3 | 4;
   initialMatrix?: Matrix;
   modulo: ModuloType;
   onChange: (matrix: Matrix, validation: MatrixValidation) => void;
@@ -34,8 +34,8 @@ export default function MatrixInput({ size, initialMatrix, modulo, onChange }: M
     // Parse the input value
     let numValue = parseInt(value) || 0;
     
-    // Constrain to [0, 25]
-    numValue = Math.max(0, Math.min(25, numValue));
+    // Constrain to [0, modulo-1]
+    numValue = Math.max(0, Math.min(modulo - 1, numValue));
     
     // Create new matrix with updated value
     const newMatrix = matrix.map((r, i) => 
@@ -75,11 +75,11 @@ export default function MatrixInput({ size, initialMatrix, modulo, onChange }: M
                   key={`${i}-${j}`}
                   type="number"
                   min="0"
-                  max="25"
+                  max={modulo - 1}
                   value={cell}
                   onChange={(e) => handleCellChange(i, j, e.target.value)}
                   className={`
-                    w-16 h-16 text-center text-xl font-mono
+                    ${size === 4 ? 'w-14 h-14 text-lg' : 'w-16 h-16 text-xl'} text-center font-mono
                     bg-black/50 border-2 rounded
                     focus:outline-none focus:ring-2 focus:ring-green-500
                     transition-colors
@@ -107,7 +107,7 @@ export default function MatrixInput({ size, initialMatrix, modulo, onChange }: M
             {validation.determinant}
           </span>
           <span className="text-gray-400 mx-2">|</span>
-          <span className="text-gray-400">gcd(det, 26) = </span>
+          <span className="text-gray-400">gcd(det, {modulo}) = </span>
           <span className={validation.gcd === 1 ? 'text-green-400' : 'text-red-400'}>
             {validation.gcd}
           </span>

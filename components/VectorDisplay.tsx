@@ -22,6 +22,10 @@ export default function VectorDisplay({
     return String.fromCharCode(65 + num);
   };
 
+  // Adjust cell size based on vector length
+  const cellSize = vector.length === 4 ? 'w-10 h-10 text-base' : 'w-12 h-12 text-lg';
+  const gapSize = vector.length === 4 ? 'gap-1.5' : 'gap-2';
+
   return (
     <div className="inline-flex flex-col items-center gap-2 max-w-full">
       {/* Optional label */}
@@ -51,7 +55,7 @@ export default function VectorDisplay({
             
             {/* Vector elements */}
             <div 
-              className="px-4 py-2 flex flex-col gap-2"
+              className={`px-4 py-2 flex flex-col ${gapSize}`}
               role="list"
               aria-label={label || "Vecteur"}
             >
@@ -59,8 +63,8 @@ export default function VectorDisplay({
                 <div
                   key={i}
                   className={`
-                    w-12 h-12 flex items-center justify-center
-                    font-mono text-lg font-semibold
+                    ${cellSize} flex items-center justify-center
+                    font-mono font-semibold
                     transition-all duration-300
                     ${highlight 
                       ? 'text-green-400 scale-105' 
@@ -107,7 +111,7 @@ export default function VectorDisplay({
             
             {/* Vector elements */}
             <div 
-              className="px-4 py-2 flex flex-row gap-2 overflow-x-auto max-w-full"
+              className={`px-4 py-2 flex flex-row ${gapSize} overflow-x-auto max-w-full`}
               role="list"
               aria-label={label || "Vecteur"}
               style={{ scrollbarWidth: 'thin' }}
@@ -116,8 +120,8 @@ export default function VectorDisplay({
                 <div
                   key={i}
                   className={`
-                    w-12 h-12 flex items-center justify-center flex-shrink-0
-                    font-mono text-lg font-semibold
+                    ${cellSize} flex items-center justify-center flex-shrink-0
+                    font-mono font-semibold
                     transition-all duration-300
                     ${highlight 
                       ? 'text-green-400 scale-105' 

@@ -1,8 +1,8 @@
 'use client';
 
 interface ControlPanelProps {
-  matrixSize: 2 | 3;
-  onMatrixSizeChange: (size: 2 | 3) => void;
+  matrixSize: 2 | 3 | 4;
+  onMatrixSizeChange: (size: 2 | 3 | 4) => void;
   onEncrypt: () => void;
   onDecrypt: () => void;
   onGenerateMatrix: () => void;
@@ -64,6 +64,24 @@ export default function ControlPanel({
             aria-pressed={matrixSize === 3}
           >
             3×3
+          </button>
+          <button
+            onClick={() => onMatrixSizeChange(4)}
+            disabled={isProcessing}
+            className={`
+              flex-1 px-6 py-3 font-mono text-lg font-bold rounded-lg
+              border-2 transition-all
+              ${matrixSize === 4
+                ? 'bg-green-500/20 border-green-500 text-green-400 shadow-lg shadow-green-500/20'
+                : 'bg-black/50 border-green-500/30 text-green-400/60 hover:border-green-500/50 hover:text-green-400'
+              }
+              ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+              focus:outline-none focus:ring-2 focus:ring-green-500
+            `}
+            aria-label="Sélectionner matrice 4×4"
+            aria-pressed={matrixSize === 4}
+          >
+            4×4
           </button>
         </div>
       </div>

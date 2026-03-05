@@ -18,7 +18,7 @@ import Footer from '@/components/Footer';
 
 export default function Home() {
   // State management
-  const [matrixSize, setMatrixSize] = useState<2 | 3>(2);
+  const [matrixSize, setMatrixSize] = useState<2 | 3 | 4>(2);
   const [modulo, setModulo] = useState<ModuloType>(26);
   const [matrix, setMatrix] = useState<Matrix>([[3, 3], [2, 5]]);
   const [matrixValidation, setMatrixValidation] = useState<MatrixValidation>({
@@ -43,12 +43,14 @@ export default function Home() {
   };
 
   // Handle matrix size change
-  const handleMatrixSizeChange = (newSize: 2 | 3) => {
+  const handleMatrixSizeChange = (newSize: 2 | 3 | 4) => {
     setMatrixSize(newSize);
     // Reset matrix to default for new size
     const defaultMatrix = newSize === 2 
       ? [[3, 3], [2, 5]] 
-      : [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
+      : newSize === 3
+      ? [[6, 24, 1], [13, 16, 10], [20, 17, 15]]
+      : [[6, 24, 1, 13], [13, 16, 10, 20], [20, 17, 15, 6], [1, 2, 3, 5]];
     setMatrix(defaultMatrix);
     // Revalidate with current modulo
     const validation = validateMatrixModulo(defaultMatrix, modulo);

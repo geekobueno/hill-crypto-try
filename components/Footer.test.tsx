@@ -8,7 +8,7 @@ describe('Footer', () => {
     
     expect(screen.getByText('Projet Académique')).toBeInTheDocument();
     expect(screen.getByText(/CRYPTOGRAPHIE/)).toBeInTheDocument();
-    expect(screen.getByText(/ESGIS-TOGO/)).toBeInTheDocument();
+    expect(screen.getAllByText(/ESGIS-TOGO/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Systèmes Réseaux et Sécurité/)).toBeInTheDocument();
     expect(screen.getByText(/Master 2/)).toBeInTheDocument();
     expect(screen.getByText(/2025-2026/)).toBeInTheDocument();

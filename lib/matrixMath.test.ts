@@ -305,15 +305,16 @@ describe('validateMatrix', () => {
 
   it('should reject matrix with wrong dimensions', () => {
     const matrix: Matrix = [
-      [1, 2, 3, 4],
-      [5, 6, 7, 8],
-      [9, 10, 11, 12],
-      [13, 14, 15, 16]
+      [1, 2, 3, 4, 5],
+      [5, 6, 7, 8, 9],
+      [9, 10, 11, 12, 13],
+      [13, 14, 15, 16, 17],
+      [17, 18, 19, 20, 21]
     ];
     const validation = validateMatrix(matrix);
     
     expect(validation.isValid).toBe(false);
-    expect(validation.error).toBe('La matrice doit être 2×2 ou 3×3');
+    expect(validation.error).toBe('La matrice doit être 2×2, 3×3 ou 4×4');
   });
 
   it('should calculate determinant modulo 26', () => {

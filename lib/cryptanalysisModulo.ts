@@ -13,7 +13,7 @@ export interface KnownPair {
  */
 export function knownPlaintextAttack(
   pairs: KnownPair[],
-  matrixSize: 2 | 3,
+  matrixSize: 2 | 3 | 4,
   modulo: ModuloType
 ): Matrix | null {
   if (pairs.length < matrixSize) {

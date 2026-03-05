@@ -100,11 +100,12 @@ export function modInverse(a: number, m: number): number | null {
 }
 
 /**
- * Calculates the determinant of a square matrix (2×2 or 3×3).
+ * Calculates the determinant of a square matrix (2×2, 3×3, or 4×4).
  * For 2×2: det = a*d - b*c
  * For 3×3: uses cofactor expansion along the first row
+ * For 4×4: uses cofactor expansion along the first row
  * 
- * @param matrix - Square matrix (2×2 or 3×3)
+ * @param matrix - Square matrix (2×2, 3×3, or 4×4)
  * @returns The determinant value
  * 
  * Preconditions:
@@ -115,7 +116,7 @@ export function modInverse(a: number, m: number): number | null {
  * Postconditions:
  * - Returns determinant value as integer
  * - For 2×2 matrix: det = (a*d - b*c)
- * - For 3×3 matrix: uses cofactor expansion
+ * - For 3×3 and 4×4 matrix: uses cofactor expansion
  */
 export function matrixDeterminant(matrix: Matrix): number {
   const n = matrix.length;
@@ -131,9 +132,29 @@ export function matrixDeterminant(matrix: Matrix): number {
     const g = matrix[2][0], h = matrix[2][1], i = matrix[2][2];
     
     return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+  } else if (n === 4) {
+    // 4×4 determinant using cofactor expansion along first row
+    let det = 0;
+    for (let j = 0; j < 4; j++) {
+      // Create 3×3 minor by removing row 0 and column j
+      const minor: Matrix = [];
+      for (let i = 1; i < 4; i++) {
+        const row: number[] = [];
+        for (let k = 0; k < 4; k++) {
+          if (k !== j) {
+            row.push(matrix[i][k]);
+          }
+        }
+        minor.push(row);
+      }
+      // Calculate cofactor: (-1)^(0+j) * matrix[0][j] * det(minor)
+      const sign = j % 2 === 0 ? 1 : -1;
+      det += sign * matrix[0][j] * matrixDeterminant(minor);
+    }
+    return det;
   }
   
-  throw new Error(`Unsupported matrix size: ${n}×${n}. Only 2×2 and 3×3 matrices are supported.`);
+  throw new Error(`Unsupported matrix size: ${n}×${n}. Only 2×2, 3×3, and 4×4 matrices are supported.`);
 }
 
 /**
@@ -311,12 +332,12 @@ export function multiplyMatrices(a: Matrix, b: Matrix): Matrix {
 export function validateMatrix(matrix: Matrix): MatrixValidation {
   // Step 1: Check dimensions
   const n = matrix.length;
-  if (n !== 2 && n !== 3) {
+  if (n !== 2 && n !== 3 && n !== 4) {
     return { 
       isValid: false, 
       determinant: 0, 
       gcd: 0, 
-      error: 'La matrice doit être 2×2 ou 3×3' 
+      error: 'La matrice doit être 2×2, 3×3 ou 4×4' 
     };
   }
   

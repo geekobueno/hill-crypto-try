@@ -4,7 +4,7 @@ import { validateMatrixModulo } from './matrixMathModulo';
 /**
  * Generates a random valid matrix for Hill cipher with the specified modulo.
  */
-export function generateRandomValidMatrix(size: 2 | 3, modulo: ModuloType): Matrix {
+export function generateRandomValidMatrix(size: 2 | 3 | 4, modulo: ModuloType): Matrix {
   const maxAttempts = 1000;
   let attempts = 0;
   
@@ -34,11 +34,18 @@ export function generateRandomValidMatrix(size: 2 | 3, modulo: ModuloType): Matr
     } else {
       return [[5, 8], [3, 7]];
     }
-  } else {
+  } else if (size === 3) {
     if (modulo === 26) {
       return [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
     } else {
       return [[6, 24, 1], [13, 16, 10], [20, 17, 15]];
+    }
+  } else {
+    // size === 4
+    if (modulo === 26) {
+      return [[6, 24, 1, 13], [13, 16, 10, 20], [20, 17, 15, 6], [1, 2, 3, 5]];
+    } else {
+      return [[6, 24, 1, 13], [13, 16, 10, 20], [20, 17, 15, 6], [1, 2, 3, 5]];
     }
   }
 }

@@ -15,6 +15,9 @@ export default function MatrixDisplay({
 }: MatrixDisplayProps) {
   const size = matrix.length;
   
+  // Adjust cell size based on matrix size
+  const cellSize = size === 4 ? 'w-10 h-10 text-base' : 'w-12 h-12 text-lg';
+  
   return (
     <div className="inline-flex flex-col items-center gap-2">
       {/* Optional label */}
@@ -46,7 +49,7 @@ export default function MatrixDisplay({
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
-            gap: '0.5rem'
+            gap: size === 4 ? '0.375rem' : '0.5rem'
           }}
           role="table"
           aria-label={label || "Matrice"}
@@ -56,8 +59,8 @@ export default function MatrixDisplay({
               <div
                 key={`${i}-${j}`}
                 className={`
-                  w-12 h-12 flex items-center justify-center
-                  font-mono text-lg font-semibold
+                  ${cellSize} flex items-center justify-center
+                  font-mono font-semibold
                   transition-all duration-300
                   ${highlight 
                     ? 'text-green-400 scale-105' 
