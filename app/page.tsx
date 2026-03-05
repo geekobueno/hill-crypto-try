@@ -14,6 +14,7 @@ import Disclaimer from '@/components/Disclaimer';
 import ConceptExplainer from '@/components/ConceptExplainer';
 import AttackSection from '@/components/AttackSection';
 import AlphabetReference from '@/components/AlphabetReference';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   // State management
@@ -359,6 +360,9 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </main>
   );
 }
